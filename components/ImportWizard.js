@@ -75,12 +75,12 @@ export default function ImportWizard({ onImport, onCancel }) {
       setPlRaw(data);
       const auto = {};
       data.headers.forEach((h, i) => {
-        const hl = h.toLowerCase();
-        if (hl.includes("equipo")) auto.team = i;
+        const hl = h.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        if (hl.startsWith("equipo") && hl.includes("(")) auto.team = i;
         else if (hl === "nombre") auto.name = i;
         else if (hl.includes("apellido")) auto.lastname = i;
-        else if (hl.includes("movil") || hl.includes("móvil") || hl === "telefono") auto.phone = i;
-        else if (hl.includes("capitan jugador") || hl.includes("capitán jugador")) auto.captain = i;
+        else if (hl.includes("movil") || hl.includes("telefono")) auto.phone = i;
+        else if (hl.includes("capitan jugador")) auto.captain = i;
       });
       setPlMap(auto);
     } catch (err) {
@@ -114,8 +114,14 @@ export default function ImportWizard({ onImport, onCancel }) {
       const last = plMap.lastname !== undefined ? String(row[plMap.lastname] || "").trim() : "";
       const fullName = `${name} ${last}`.trim();
       const phone = String(row[plMap.phone] || "").replace(/\.0$/, "");
-      const captain = plMap.captain !== undefined ? String(row[plMap.captain] || "").toLowerCase() === "si" : false;
+      const capVal = plMap.captain !== undefined ? String(row[plMap.captain] || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "") : "";
+      const captain = capVal === "si";
       teamsPlayers[tid].push({ n: fullName, ph: phone, c: captain });
+    });
+
+    console.log("[ImportWizard] teamsPlayers keys:", Object.keys(teamsPlayers));
+    Object.entries(teamsPlayers).forEach(([tid, players]) => {
+      console.log(`[ImportWizard] Team ${tid}: ${players.length} jugadores, capitanes: ${players.filter(p => p.c).map(p => p.n).join(", ") || "ninguno"}`);
     });
 
     // Parse encounters
@@ -148,6 +154,8 @@ export default function ImportWizard({ onImport, onCancel }) {
         p2: teamsPlayers[t2id] || [],
       });
     });
+
+    console.log(`[ImportWizard] ${encounters.length} enfrentamientos, con jugadores: ${encounters.filter(e => e.p1.length > 0 || e.p2.length > 0).length}`);
 
     if (!encounters.length) {
       setError("No se detectaron enfrentamientos válidos. Revisa las columnas.");
