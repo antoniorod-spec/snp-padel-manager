@@ -67,7 +67,7 @@ export default function CourtsBoard({ encounters, state, onCourt, onSet, blocked
       </div>
 
       {/* 16 courts grid - 4 cols x 4 rows */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8, marginBottom: 16 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 8, marginBottom: 16 }}>
         {COURTS.map(c => {
           const info = courtMap[c];
           const blocked = blockedCourts[c];
@@ -94,7 +94,7 @@ export default function CourtsBoard({ encounters, state, onCourt, onSet, blocked
               background: w > 0 ? "linear-gradient(135deg,#F0FDF4,#DCFCE7)" : "#fff",
               borderRadius: 10, padding: 10,
               border: `2px solid ${w > 0 ? "#10B981" : hasScore ? "#F59E0B" : "#EF4444"}`,
-              minHeight: 140, display: "flex", flexDirection: "column",
+              minWidth: 0, minHeight: 140, display: "flex", flexDirection: "column", overflow: "hidden",
             }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
@@ -149,14 +149,16 @@ export default function CourtsBoard({ encounters, state, onCourt, onSet, blocked
                   </div>
                 </div>
               ) : (
-                <div style={{ display: "flex", gap: 3 }}>
+                <div style={{ display: "flex", gap: 3, minWidth: 0 }}>
                   <button onClick={() => onSet(enc.id, matchIdx, 0)} style={{
-                    flex: 1, padding: 5, borderRadius: 4, border: "1px solid #3B82F6",
+                    flex: 1, minWidth: 0, padding: 5, borderRadius: 4, border: "1px solid #3B82F6",
                     background: "#EFF6FF", color: "#1D4ED8", fontSize: 10, fontWeight: 800, cursor: "pointer",
+                    overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                   }}>+ {enc.t1.slice(0, 8)}</button>
                   <button onClick={() => onSet(enc.id, matchIdx, 1)} style={{
-                    flex: 1, padding: 5, borderRadius: 4, border: "1px solid #EF4444",
+                    flex: 1, minWidth: 0, padding: 5, borderRadius: 4, border: "1px solid #EF4444",
                     background: "#FEF2F2", color: "#DC2626", fontSize: 10, fontWeight: 800, cursor: "pointer",
+                    overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap",
                   }}>+ {enc.t2.slice(0, 8)}</button>
                   {hasScore && <button onClick={() => onSet(enc.id, matchIdx, -99)} style={{
                     padding: 5, borderRadius: 4, border: "1px solid #F59E0B",
@@ -228,7 +230,7 @@ function CourtFreeCard({ courtNum, waiting, onAssign, onBlock }) {
       background: "linear-gradient(135deg,#064E3B,#065F46)",
       borderRadius: 10, padding: 10,
       border: "2px dashed #10B981",
-      minHeight: 120, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+      minWidth: 0, minHeight: 120, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", overflow: "hidden",
     }}>
       <div style={{
         fontSize: 28, fontWeight: 900, color: "#22D3EE",
@@ -278,7 +280,7 @@ function CourtBlockedCard({ courtNum, reason, onUnblock }) {
       background: "linear-gradient(135deg,#7F1D1D,#991B1B)",
       borderRadius: 10, padding: 10,
       border: "2px solid #EF4444",
-      minHeight: 120, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+      minWidth: 0, minHeight: 120, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", overflow: "hidden",
     }}>
       <div style={{
         fontSize: 28, fontWeight: 900, color: "#FCA5A5",
