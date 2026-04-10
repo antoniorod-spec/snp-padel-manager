@@ -1,9 +1,10 @@
 "use client";
+import { useState } from "react";
 import { LV_COLORS, matchWinner, encScore, minsUntil, fmtCountdown } from "@/lib/utils";
 
 const COURTS = Array.from({ length: 16 }, (_, i) => i + 1);
 
-export default function CourtsBoard({ encounters, state, onCourt, onSet }) {
+export default function CourtsBoard({ encounters, state, onCourt, onSet, blockedCourts = {}, onBlockCourt, onUnblockCourt }) {
   // Build court -> match info map
   const courtMap = {};
   encounters.forEach(e => {
@@ -29,8 +30,9 @@ export default function CourtsBoard({ encounters, state, onCourt, onSet }) {
   });
   waiting.sort((a, b) => a.priority - b.priority);
 
+  const blockedCount = Object.keys(blockedCourts).length;
   const usedCount = Object.keys(courtMap).length;
-  const freeCount = 16 - usedCount;
+  const freeCount = 16 - usedCount - blockedCount;
 
   // Available courts as Set for the assigner
   const allUsed = new Set(Object.keys(courtMap).map(Number));
@@ -54,7 +56,7 @@ export default function CourtsBoard({ encounters, state, onCourt, onSet }) {
         </div>
         <div style={{ width: 1, height: 40, background: "#10B981", opacity: 0.5 }} />
         <div style={{ textAlign: "center" }}>
-          <div style={{ fontSize: 32, fontWeight: 900, color: "#FCA5A5", fontFamily: "monospace", lineHeight: 1 }}>{usedCount}</div>
+          <div style={{ fontSize: 32, fontWeight: 900, color: "#FCA5A5", fontFamily: "monospace", lineHeight: 1 }}>{usedCount + blockedCount}</div>
           <div style={{ fontSize: 10, color: "#FCA5A5", fontWeight: 700, textTransform: "uppercase", marginTop: 3 }}>Ocupadas</div>
         </div>
         <div style={{ width: 1, height: 40, background: "#10B981", opacity: 0.5 }} />
@@ -68,11 +70,17 @@ export default function CourtsBoard({ encounters, state, onCourt, onSet }) {
       <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: 8, marginBottom: 16 }}>
         {COURTS.map(c => {
           const info = courtMap[c];
-          const isFree = !info;
+          const blocked = blockedCourts[c];
 
-          if (isFree) {
+          if (blocked) {
             return (
-              <CourtFreeCard key={c} courtNum={c} waiting={waiting} onAssign={handleAssignCourt} />
+              <CourtBlockedCard key={c} courtNum={c} reason={blocked} onUnblock={onUnblockCourt} />
+            );
+          }
+
+          if (!info) {
+            return (
+              <CourtFreeCard key={c} courtNum={c} waiting={waiting} onAssign={handleAssignCourt} onBlock={onBlockCourt} />
             );
           }
 
@@ -122,21 +130,39 @@ export default function CourtsBoard({ encounters, state, onCourt, onSet }) {
                   <div style={{ textAlign: "center", fontSize: 10, fontWeight: 800, color: "#059669", marginBottom: 4 }}>
                     ✅ {w === 1 ? enc.t1 : enc.t2}
                   </div>
-                  <button onClick={() => onCourt(enc.id, matchIdx, null)} style={{
-                    width: "100%", padding: 5, borderRadius: 5, border: "1px solid #10B981",
-                    background: "#D1FAE5", color: "#059669", fontSize: 10, fontWeight: 800, cursor: "pointer",
-                  }}>🏁 LIBERAR</button>
+                  <div style={{ display: "flex", gap: 3 }}>
+                    <button onClick={() => onCourt(enc.id, matchIdx, null)} style={{
+                      flex: 1, padding: 5, borderRadius: 5, border: "1px solid #10B981",
+                      background: "#D1FAE5", color: "#059669", fontSize: 10, fontWeight: 800, cursor: "pointer",
+                    }}>🏁 LIBERAR</button>
+                    <button onClick={() => onSet(enc.id, matchIdx, -99)} style={{
+                      padding: 5, borderRadius: 5, border: "1px solid #EF4444",
+                      background: "#FEF2F2", color: "#DC2626", fontSize: 10, fontWeight: 800, cursor: "pointer",
+                    }}>↺ REINICIAR</button>
+                  </div>
                 </div>
               ) : (
-                <div style={{ display: "flex", gap: 3 }}>
-                  <button onClick={() => onSet(enc.id, matchIdx, 0)} style={{
-                    flex: 1, padding: 5, borderRadius: 4, border: "1px solid #3B82F6",
-                    background: "#EFF6FF", color: "#1D4ED8", fontSize: 10, fontWeight: 800, cursor: "pointer",
-                  }}>+ {enc.t1.slice(0, 8)}</button>
-                  <button onClick={() => onSet(enc.id, matchIdx, 1)} style={{
-                    flex: 1, padding: 5, borderRadius: 4, border: "1px solid #EF4444",
-                    background: "#FEF2F2", color: "#DC2626", fontSize: 10, fontWeight: 800, cursor: "pointer",
-                  }}>+ {enc.t2.slice(0, 8)}</button>
+                <div>
+                  <div style={{ display: "flex", gap: 3, marginBottom: 3 }}>
+                    <button onClick={() => onSet(enc.id, matchIdx, 0)} style={{
+                      flex: 1, padding: 5, borderRadius: 4, border: "1px solid #3B82F6",
+                      background: "#EFF6FF", color: "#1D4ED8", fontSize: 10, fontWeight: 800, cursor: "pointer",
+                    }}>+ {enc.t1.slice(0, 8)}</button>
+                    <button onClick={() => onSet(enc.id, matchIdx, 1)} style={{
+                      flex: 1, padding: 5, borderRadius: 4, border: "1px solid #EF4444",
+                      background: "#FEF2F2", color: "#DC2626", fontSize: 10, fontWeight: 800, cursor: "pointer",
+                    }}>+ {enc.t2.slice(0, 8)}</button>
+                  </div>
+                  <div style={{ display: "flex", gap: 3 }}>
+                    <button onClick={() => onCourt(enc.id, matchIdx, null)} style={{
+                      flex: 1, padding: 4, borderRadius: 4, border: "1px solid #94A3B8",
+                      background: "#F8FAFC", color: "#64748B", fontSize: 9, fontWeight: 700, cursor: "pointer",
+                    }}>✕ Quitar cancha</button>
+                    {hasScore && <button onClick={() => onSet(enc.id, matchIdx, -99)} style={{
+                      padding: 4, borderRadius: 4, border: "1px solid #F59E0B",
+                      background: "#FEF3C7", color: "#D97706", fontSize: 9, fontWeight: 700, cursor: "pointer",
+                    }}>↺ Reiniciar</button>}
+                  </div>
                 </div>
               )}
             </div>
@@ -178,7 +204,7 @@ export default function CourtsBoard({ encounters, state, onCourt, onSet }) {
                     </div>
                   </div>
                   {/* Quick assign: pick first free court */}
-                  <QuickAssignButton courtMap={courtMap} encId={w.enc.id} matchIdx={w.matchIdx} onAssign={handleAssignCourt} />
+                  <QuickAssignButton courtMap={courtMap} blockedCourts={blockedCourts} encId={w.enc.id} matchIdx={w.matchIdx} onAssign={handleAssignCourt} />
                 </div>
               );
             })}
@@ -194,7 +220,10 @@ export default function CourtsBoard({ encounters, state, onCourt, onSet }) {
   );
 }
 
-function CourtFreeCard({ courtNum, waiting, onAssign }) {
+const BLOCK_REASONS = ["Mal estado", "Mesa de control", "Reservada", "Mantenimiento"];
+
+function CourtFreeCard({ courtNum, waiting, onAssign, onBlock }) {
+  const [showBlock, setShowBlock] = useState(false);
   return (
     <div style={{
       background: "linear-gradient(135deg,#064E3B,#065F46)",
@@ -207,22 +236,71 @@ function CourtFreeCard({ courtNum, waiting, onAssign }) {
         fontFamily: "monospace", lineHeight: 1, marginBottom: 4,
       }}>C{courtNum}</div>
       <div style={{ fontSize: 10, color: "#6EE7B7", fontWeight: 800, textTransform: "uppercase", marginBottom: 8 }}>LIBRE</div>
-      {waiting.length > 0 && (
+      {waiting.length > 0 && !showBlock && (
         <button onClick={() => onAssign(waiting[0].enc.id, waiting[0].matchIdx, courtNum)} style={{
           background: "#F59E0B", color: "#0F172A", border: "none",
           padding: "5px 10px", borderRadius: 5, fontSize: 10, fontWeight: 800,
-          cursor: "pointer", textAlign: "center", lineHeight: 1.2,
+          cursor: "pointer", textAlign: "center", lineHeight: 1.2, marginBottom: 4,
         }}>
           ► Asignar {waiting[0].enc.time}<br />
           <span style={{ fontSize: 8, fontWeight: 600, opacity: 0.8 }}>P{waiting[0].matchIdx + 1} · {waiting[0].enc.lv}</span>
         </button>
       )}
+      {!showBlock ? (
+        <button onClick={() => setShowBlock(true)} style={{
+          background: "transparent", color: "#94A3B8", border: "1px solid #475569",
+          padding: "3px 8px", borderRadius: 4, fontSize: 9, fontWeight: 700,
+          cursor: "pointer",
+        }}>🚫 Marcar ocupada</button>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: 3, width: "100%" }}>
+          <div style={{ fontSize: 9, color: "#FDE68A", fontWeight: 700, textAlign: "center" }}>MOTIVO:</div>
+          {BLOCK_REASONS.map(r => (
+            <button key={r} onClick={() => { onBlock(courtNum, r); setShowBlock(false); }} style={{
+              background: "#EF4444", color: "#fff", border: "none",
+              padding: "4px 6px", borderRadius: 4, fontSize: 9, fontWeight: 700,
+              cursor: "pointer",
+            }}>{r}</button>
+          ))}
+          <button onClick={() => setShowBlock(false)} style={{
+            background: "transparent", color: "#94A3B8", border: "1px solid #475569",
+            padding: "3px 6px", borderRadius: 4, fontSize: 9, fontWeight: 600,
+            cursor: "pointer",
+          }}>Cancelar</button>
+        </div>
+      )}
     </div>
   );
 }
 
-function QuickAssignButton({ courtMap, encId, matchIdx, onAssign }) {
-  const freeCourts = COURTS.filter(c => !courtMap[c]);
+function CourtBlockedCard({ courtNum, reason, onUnblock }) {
+  return (
+    <div style={{
+      background: "linear-gradient(135deg,#7F1D1D,#991B1B)",
+      borderRadius: 10, padding: 10,
+      border: "2px solid #EF4444",
+      minHeight: 160, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+    }}>
+      <div style={{
+        fontSize: 36, fontWeight: 900, color: "#FCA5A5",
+        fontFamily: "monospace", lineHeight: 1, marginBottom: 4,
+      }}>C{courtNum}</div>
+      <div style={{ fontSize: 10, color: "#FCA5A5", fontWeight: 800, textTransform: "uppercase", marginBottom: 4 }}>🚫 NO DISPONIBLE</div>
+      <div style={{
+        fontSize: 10, color: "#FECACA", fontWeight: 600,
+        background: "rgba(0,0,0,0.3)", padding: "2px 8px", borderRadius: 4, marginBottom: 8,
+      }}>{reason}</div>
+      <button onClick={() => onUnblock(courtNum)} style={{
+        background: "#10B981", color: "#fff", border: "none",
+        padding: "5px 10px", borderRadius: 5, fontSize: 10, fontWeight: 800,
+        cursor: "pointer",
+      }}>✓ Habilitar</button>
+    </div>
+  );
+}
+
+function QuickAssignButton({ courtMap, blockedCourts = {}, encId, matchIdx, onAssign }) {
+  const freeCourts = COURTS.filter(c => !courtMap[c] && !blockedCourts[c]);
   if (freeCourts.length === 0) {
     return <span style={{ fontSize: 9, color: "#EF4444", fontWeight: 700 }}>Sin libres</span>;
   }

@@ -54,7 +54,13 @@ function MatchRow({ idx, match, t1, t2, allUsed, onCourt, onSet, encId }) {
 
       {match.ct && !done && (
         <div>
-          <div style={{ fontSize: 9, fontWeight: 700, color: "#64748B", marginBottom: 6 }}>¿QUIÉN GANÓ EL SET?</div>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
+            <div style={{ fontSize: 9, fontWeight: 700, color: "#64748B" }}>¿QUIÉN GANÓ EL SET?</div>
+            <button onClick={() => onCourt(encId, idx, null)} style={{
+              padding: "2px 8px", borderRadius: 4, border: "1px solid #94A3B8",
+              background: "#F8FAFC", color: "#64748B", fontSize: 9, fontWeight: 700, cursor: "pointer",
+            }}>✕ Quitar C{match.ct}</button>
+          </div>
           <div style={{ display: "flex", gap: 6 }}>
             <button onClick={() => onSet(encId, idx, 0)} style={{
               flex: 1, padding: "10px 8px", borderRadius: 8, border: "2px solid #3B82F6",
@@ -71,27 +77,39 @@ function MatchRow({ idx, match, t1, t2, allUsed, onCourt, onSet, encId }) {
               <div style={{ fontSize: 9, color: "#64748B", marginTop: 2 }}>Set {match.s[0] + match.s[1] + 1}</div>
             </button>
           </div>
-          {(match.s[0] > 0 || match.s[1] > 0) && (
-            <button onClick={() => onSet(encId, idx, -1)} style={{
-              marginTop: 6, width: "100%", padding: 4, borderRadius: 5, border: "1px solid #E2E8F0",
-              background: "#fff", color: "#94A3B8", fontSize: 10, fontWeight: 600, cursor: "pointer",
-            }}>Deshacer último set</button>
-          )}
+          <div style={{ display: "flex", gap: 4, marginTop: 6 }}>
+            {(match.s[0] > 0 || match.s[1] > 0) && (
+              <button onClick={() => onSet(encId, idx, -1)} style={{
+                flex: 1, padding: 4, borderRadius: 5, border: "1px solid #E2E8F0",
+                background: "#fff", color: "#94A3B8", fontSize: 10, fontWeight: 600, cursor: "pointer",
+              }}>Deshacer último set</button>
+            )}
+            {(match.s[0] > 0 || match.s[1] > 0) && (
+              <button onClick={() => onSet(encId, idx, -99)} style={{
+                padding: "4px 8px", borderRadius: 5, border: "1px solid #F59E0B",
+                background: "#FEF3C7", color: "#D97706", fontSize: 10, fontWeight: 600, cursor: "pointer",
+              }}>↺ Reiniciar</button>
+            )}
+          </div>
         </div>
       )}
 
       {match.ct && done && (
         <div style={{ textAlign: "center" }}>
           <span style={{ fontSize: 12, fontWeight: 700, color: "#064E3B" }}>Terminado: {match.s[0]}-{match.s[1]}</span>
-          <div>
+          <div style={{ display: "flex", gap: 4, justifyContent: "center", marginTop: 4 }}>
             <button onClick={() => onSet(encId, idx, -1)} style={{
-              marginTop: 4, padding: "3px 10px", borderRadius: 5, border: "1px solid #E2E8F0",
+              padding: "3px 10px", borderRadius: 5, border: "1px solid #E2E8F0",
               background: "#fff", color: "#94A3B8", fontSize: 10, fontWeight: 600, cursor: "pointer",
             }}>Deshacer</button>
             <button onClick={() => onCourt(encId, idx, null)} style={{
-              marginTop: 4, marginLeft: 4, padding: "3px 10px", borderRadius: 5, border: "1px solid #E2E8F0",
+              padding: "3px 10px", borderRadius: 5, border: "1px solid #E2E8F0",
               background: "#fff", color: "#94A3B8", fontSize: 10, fontWeight: 600, cursor: "pointer",
             }}>Liberar cancha</button>
+            <button onClick={() => onSet(encId, idx, -99)} style={{
+              padding: "3px 10px", borderRadius: 5, border: "1px solid #F59E0B",
+              background: "#FEF3C7", color: "#D97706", fontSize: 10, fontWeight: 600, cursor: "pointer",
+            }}>↺ Reiniciar</button>
           </div>
         </div>
       )}

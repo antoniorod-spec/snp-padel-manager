@@ -102,7 +102,9 @@ export default function Page() {
     const cur = state[eid] || initEncounterState();
     const s = cur.m[mi].s;
     let ns;
-    if (team === -1) {
+    if (team === -99) {
+      ns = [0, 0];
+    } else if (team === -1) {
       if (s[0] > 0 && s[0] >= s[1]) ns = [s[0] - 1, s[1]];
       else if (s[1] > 0) ns = [s[0], s[1] - 1];
       else ns = [...s];
@@ -118,6 +120,18 @@ export default function Page() {
     return tournament.encounters.filter(e => e.date === selectedDate);
   }, [tournament, selectedDate]);
 
+  const blockedCourts = useMemo(() => state._blocked || {}, [state]);
+
+  const onBlockCourt = (courtNum, reason) => {
+    const blocked = { ...(state._blocked || {}), [courtNum]: reason || "Bloqueada" };
+    saveState({ ...state, _blocked: blocked });
+  };
+  const onUnblockCourt = (courtNum) => {
+    const blocked = { ...(state._blocked || {}) };
+    delete blocked[courtNum];
+    saveState({ ...state, _blocked: blocked });
+  };
+
   const allUsed = useMemo(() => {
     const s = new Set();
     encountersByDate.forEach(e => {
@@ -125,6 +139,7 @@ export default function Page() {
       if (!es || es.st === "finished") return;
       es.m.forEach(m => { if (m.ct) s.add(m.ct); });
     });
+    Object.keys(state._blocked || {}).forEach(c => s.add(Number(c)));
     return s;
   }, [state, encountersByDate]);
 
@@ -230,6 +245,9 @@ export default function Page() {
           state={state}
           onCourt={onCourt}
           onSet={onSet}
+          blockedCourts={blockedCourts}
+          onBlockCourt={onBlockCourt}
+          onUnblockCourt={onUnblockCourt}
         />
       )}
 
