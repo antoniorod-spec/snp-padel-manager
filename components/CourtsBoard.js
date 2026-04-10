@@ -94,14 +94,21 @@ export default function CourtsBoard({ encounters, state, onCourt, onSet, blocked
               background: w > 0 ? "linear-gradient(135deg,#F0FDF4,#DCFCE7)" : "#fff",
               borderRadius: 10, padding: 10,
               border: `2px solid ${w > 0 ? "#10B981" : hasScore ? "#F59E0B" : "#EF4444"}`,
-              minHeight: 160, display: "flex", flexDirection: "column",
+              minHeight: 140, display: "flex", flexDirection: "column",
             }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                <span style={{
-                  background: "#0F172A", color: "#22D3EE",
-                  fontSize: 18, fontWeight: 900, padding: "3px 10px",
-                  borderRadius: 6, fontFamily: "monospace",
-                }}>C{c}</span>
+                <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
+                  <span style={{
+                    background: "#0F172A", color: "#22D3EE",
+                    fontSize: 18, fontWeight: 900, padding: "3px 10px",
+                    borderRadius: 6, fontFamily: "monospace",
+                  }}>C{c}</span>
+                  <button onClick={() => onCourt(enc.id, matchIdx, null)} style={{
+                    background: "none", color: "#94A3B8", border: "1px solid #CBD5E1",
+                    borderRadius: 4, fontSize: 9, fontWeight: 700, cursor: "pointer",
+                    padding: "2px 5px", lineHeight: 1,
+                  }}>✕</button>
+                </div>
                 <div style={{ display: "flex", gap: 2 }}>
                   <span style={{ background: lc, color: "#fff", fontSize: 8, fontWeight: 800, padding: "2px 4px", borderRadius: 3 }}>{enc.lv}</span>
                   <span style={{ background: enc.cat === "FEM" ? "#EC4899" : "#3B82F6", color: "#fff", fontSize: 8, fontWeight: 700, padding: "2px 4px", borderRadius: 3 }}>{enc.cat === "FEM" ? "F" : "M"}</span>
@@ -138,31 +145,23 @@ export default function CourtsBoard({ encounters, state, onCourt, onSet, blocked
                     <button onClick={() => onSet(enc.id, matchIdx, -99)} style={{
                       padding: 5, borderRadius: 5, border: "1px solid #EF4444",
                       background: "#FEF2F2", color: "#DC2626", fontSize: 10, fontWeight: 800, cursor: "pointer",
-                    }}>↺ REINICIAR</button>
+                    }}>↺</button>
                   </div>
                 </div>
               ) : (
-                <div>
-                  <div style={{ display: "flex", gap: 3, marginBottom: 3 }}>
-                    <button onClick={() => onSet(enc.id, matchIdx, 0)} style={{
-                      flex: 1, padding: 5, borderRadius: 4, border: "1px solid #3B82F6",
-                      background: "#EFF6FF", color: "#1D4ED8", fontSize: 10, fontWeight: 800, cursor: "pointer",
-                    }}>+ {enc.t1.slice(0, 8)}</button>
-                    <button onClick={() => onSet(enc.id, matchIdx, 1)} style={{
-                      flex: 1, padding: 5, borderRadius: 4, border: "1px solid #EF4444",
-                      background: "#FEF2F2", color: "#DC2626", fontSize: 10, fontWeight: 800, cursor: "pointer",
-                    }}>+ {enc.t2.slice(0, 8)}</button>
-                  </div>
-                  <div style={{ display: "flex", gap: 3 }}>
-                    <button onClick={() => onCourt(enc.id, matchIdx, null)} style={{
-                      flex: 1, padding: 4, borderRadius: 4, border: "1px solid #94A3B8",
-                      background: "#F8FAFC", color: "#64748B", fontSize: 9, fontWeight: 700, cursor: "pointer",
-                    }}>✕ Quitar cancha</button>
-                    {hasScore && <button onClick={() => onSet(enc.id, matchIdx, -99)} style={{
-                      padding: 4, borderRadius: 4, border: "1px solid #F59E0B",
-                      background: "#FEF3C7", color: "#D97706", fontSize: 9, fontWeight: 700, cursor: "pointer",
-                    }}>↺ Reiniciar</button>}
-                  </div>
+                <div style={{ display: "flex", gap: 3 }}>
+                  <button onClick={() => onSet(enc.id, matchIdx, 0)} style={{
+                    flex: 1, padding: 5, borderRadius: 4, border: "1px solid #3B82F6",
+                    background: "#EFF6FF", color: "#1D4ED8", fontSize: 10, fontWeight: 800, cursor: "pointer",
+                  }}>+ {enc.t1.slice(0, 8)}</button>
+                  <button onClick={() => onSet(enc.id, matchIdx, 1)} style={{
+                    flex: 1, padding: 5, borderRadius: 4, border: "1px solid #EF4444",
+                    background: "#FEF2F2", color: "#DC2626", fontSize: 10, fontWeight: 800, cursor: "pointer",
+                  }}>+ {enc.t2.slice(0, 8)}</button>
+                  {hasScore && <button onClick={() => onSet(enc.id, matchIdx, -99)} style={{
+                    padding: 5, borderRadius: 4, border: "1px solid #F59E0B",
+                    background: "#FEF3C7", color: "#D97706", fontSize: 10, fontWeight: 800, cursor: "pointer",
+                  }}>↺</button>}
                 </div>
               )}
             </div>
@@ -229,13 +228,13 @@ function CourtFreeCard({ courtNum, waiting, onAssign, onBlock }) {
       background: "linear-gradient(135deg,#064E3B,#065F46)",
       borderRadius: 10, padding: 10,
       border: "2px dashed #10B981",
-      minHeight: 160, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+      minHeight: 120, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
     }}>
       <div style={{
-        fontSize: 36, fontWeight: 900, color: "#22D3EE",
-        fontFamily: "monospace", lineHeight: 1, marginBottom: 4,
+        fontSize: 28, fontWeight: 900, color: "#22D3EE",
+        fontFamily: "monospace", lineHeight: 1, marginBottom: 3,
       }}>C{courtNum}</div>
-      <div style={{ fontSize: 10, color: "#6EE7B7", fontWeight: 800, textTransform: "uppercase", marginBottom: 8 }}>LIBRE</div>
+      <div style={{ fontSize: 9, color: "#6EE7B7", fontWeight: 800, textTransform: "uppercase", marginBottom: 6 }}>LIBRE</div>
       {waiting.length > 0 && !showBlock && (
         <button onClick={() => onAssign(waiting[0].enc.id, waiting[0].matchIdx, courtNum)} style={{
           background: "#F59E0B", color: "#0F172A", border: "none",
@@ -279,20 +278,20 @@ function CourtBlockedCard({ courtNum, reason, onUnblock }) {
       background: "linear-gradient(135deg,#7F1D1D,#991B1B)",
       borderRadius: 10, padding: 10,
       border: "2px solid #EF4444",
-      minHeight: 160, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+      minHeight: 120, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
     }}>
       <div style={{
-        fontSize: 36, fontWeight: 900, color: "#FCA5A5",
-        fontFamily: "monospace", lineHeight: 1, marginBottom: 4,
+        fontSize: 28, fontWeight: 900, color: "#FCA5A5",
+        fontFamily: "monospace", lineHeight: 1, marginBottom: 3,
       }}>C{courtNum}</div>
-      <div style={{ fontSize: 10, color: "#FCA5A5", fontWeight: 800, textTransform: "uppercase", marginBottom: 4 }}>🚫 NO DISPONIBLE</div>
+      <div style={{ fontSize: 9, color: "#FCA5A5", fontWeight: 800, textTransform: "uppercase", marginBottom: 3 }}>🚫 NO DISPONIBLE</div>
       <div style={{
-        fontSize: 10, color: "#FECACA", fontWeight: 600,
-        background: "rgba(0,0,0,0.3)", padding: "2px 8px", borderRadius: 4, marginBottom: 8,
+        fontSize: 9, color: "#FECACA", fontWeight: 600,
+        background: "rgba(0,0,0,0.3)", padding: "2px 6px", borderRadius: 4, marginBottom: 6,
       }}>{reason}</div>
       <button onClick={() => onUnblock(courtNum)} style={{
         background: "#10B981", color: "#fff", border: "none",
-        padding: "5px 10px", borderRadius: 5, fontSize: 10, fontWeight: 800,
+        padding: "4px 8px", borderRadius: 5, fontSize: 9, fontWeight: 800,
         cursor: "pointer",
       }}>✓ Habilitar</button>
     </div>
